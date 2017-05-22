@@ -126,7 +126,6 @@ class YOLONet(object):
                 (boxes1[:, :, :, :, 3] - boxes1[:, :, :, :, 1])
             square2 = (boxes2[:, :, :, :, 2] - boxes2[:, :, :, :, 0]) * \
                 (boxes2[:, :, :, :, 3] - boxes2[:, :, :, :, 1])
-2402
 
             union_square = tf.maximum(square1 + square2 - inter_square, 1e-10)
 

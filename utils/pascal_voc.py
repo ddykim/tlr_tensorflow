@@ -9,7 +9,7 @@ import yolo.config as cfg
 
 class pascal_voc(object):
     def __init__(self, phase, rebuild=False):
-        self.data_path = os.path.join(cfg.TL_PATH, 'LISA_TL_dayTrain')
+        self.data_path = os.path.join(cfg.TL_PATH, 'YEIDO_TL_train')
         self.cache_path = cfg.CACHE_PATH
         self.batch_size = cfg.BATCH_SIZE
         self.image_size = cfg.IMAGE_SIZE
@@ -82,12 +82,12 @@ class pascal_voc(object):
             os.makedirs(self.cache_path)
 
         gt_labels = []
-		
-        for index in range(0,2161):
+        
+        for index in range(1,3930):
             label, num = self.load_tl_annotation(index)
             if num == 0:
                 continue
-            imname = os.path.join(self.data_path, 'PNGImages', index + '.png')
+            imname = os.path.join(self.data_path, 'JPGimages', str(index) + '.jpg')
             gt_labels.append({'imname': imname, 'label': label, 'flipped': False})
         print('Saving gt_labels to: ' + cache_file)
         with open(cache_file, 'wb') as f:
@@ -100,25 +100,45 @@ class pascal_voc(object):
         format.
         """
 
-        imname = os.path.join(self.data_path, 'PNGImages', index + '.png')
+        imname = os.path.join(self.data_path, 'JPGimages', str(index) + '.jpg')
         im = cv2.imread(imname)
+        
         h_ratio = 1.0 * self.image_size / im.shape[0]
         w_ratio = 1.0 * self.image_size / im.shape[1]
         # im = cv2.resize(im, [self.image_size, self.image_size])
 
         label = np.zeros((self.cell_size, self.cell_size, 25))
+        
+        filename = os.path.join(self.data_path, 'annotations', str(index) + '.txt')
+        annotation = np.genfromtxt(filename, delimiter='\t', dtype=int)
 
-        annotations_dir = os.path.join(self.data_path, 'Annotations')
+        if len(annotation) == 7:
 
-        for filename in os.listdir(annotations_dir):
-            annotation_path = os.path.join(annotations_dir, filename)
-            annotation = np.genfromtxt(annotation_path, delimiter='\t', dtype=int)
-            for index in range(len(annotation)):
-                category = annotation[index, 0]
-                x_min = annotation[index, 1]
-                y_min = annotation[index, 2]
-                w = annotation[index, 3]
-                h = annotation[index, 4]
+            category = annotation[0]
+            x_min = annotation[1]
+            y_min = annotation[2]
+            w = annotation[3]
+            h = annotation[4]
+          
+            boxes = [x_min + w / 2.0, y_min + h / 2.0, w, h]
+           
+            x_ind = int(boxes[0] * self.cell_size / self.image_size)
+            
+            y_ind = int(boxes[1] * self.cell_size / self.image_size)
+
+            label[y_ind, x_ind, 0] = 1
+            label[y_ind, x_ind, 1:5] = boxes
+            label[y_ind, x_ind, 5 + category] = 1
+
+            return label, len(annotation)
+        
+        else:           
+            for box_index in range(len(annotation)):
+                category = annotation[box_index,0]
+                x_min = annotation[box_index,1]
+                y_min = annotation[box_index,2]
+                w = annotation[box_index,3]
+                h = annotation[box_index,4]
 
                 boxes = [x_min + w / 2.0, y_min + h / 2.0, w, h]
 
@@ -127,8 +147,9 @@ class pascal_voc(object):
 
                 if label[y_ind, x_ind, 0] == 1:
                     continue
+
                 label[y_ind, x_ind, 0] = 1
                 label[y_ind, x_ind, 1:5] = boxes
                 label[y_ind, x_ind, 5 + category] = 1
 
-        return label, len(annotation)
+            return label, len(annotation)

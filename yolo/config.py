@@ -6,7 +6,7 @@ import os
 
 DATA_PATH = 'data'
 
-TL_PATH = os.path.join(DATA_PATH, 'LISA_TL_dataset')
+TL_PATH = os.path.join(DATA_PATH, 'YEIDO_TL_dataset')
 
 CACHE_PATH = os.path.join(TL_PATH, 'cache')
 
@@ -17,7 +17,7 @@ WEIGHTS_DIR = os.path.join(TL_PATH, 'weights')
 WEIGHTS_FILE = None
 # WEIGHTS_FILE = os.path.join(DATA_PATH, 'weights', 'YOLO_small.ckpt')
 
-CLASSES = ["go", "stop", "warning", "goLeft", "stopLeft", "warningLeft"]
+CLASSES = ["go", "stop", "warning"]
 
 FLIPPED = False
 
@@ -56,7 +56,7 @@ DECAY_RATE = 0.1
 
 STAIRCASE = True
 
-BATCH_SIZE = 45
+BATCH_SIZE = 20
 
 MAX_ITER = 15000
 
